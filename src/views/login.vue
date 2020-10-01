@@ -24,7 +24,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="login-btn">登陆</el-button>
+          <el-button type="primary" class="login-btn" @click="login">登陆</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import { login } from '@/api/user_index.js'
 export default {
   data () {
     return {
@@ -45,6 +46,42 @@ export default {
         ],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
       }
+    }
+  },
+  methods: {
+    login () {
+      // 再次验证表单
+      // 使用表单的validate验证方法实现数据的验证,验证完成时会调用传入的回调函数,此函数有一个参数
+      // 当参数为true时就代表验证通过(可以发登录请求了),否则就验证失败,阻止发登录请求,并提示信息
+      this.$refs.loginForm.validate((valid) => {
+        if (valid) {
+          login(this.loginForm)
+            .then(res => {
+              if (res.data.meta.status === 200) {
+                // 跳转页面
+              } else {
+                this.$message({
+                  message: res.data.meta.msg,
+                  type: 'error'
+                })
+              }
+            })
+            .catch(err => {
+              console.log(err)
+              this.$message({
+                message: '登录失败',
+                type: 'error'
+              })
+            })
+        } else {
+          this.$message({
+            message: '数据输入不合法,请重新输入',
+            type: 'error'
+          })
+          // 只有return false才能阻止请求
+          return false
+        }
+      })
     }
   }
 }
