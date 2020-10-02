@@ -59,6 +59,8 @@ export default {
             .then(res => {
               if (res.data.meta.status === 200) {
                 console.log(res)
+                // 在路由跳转之前保存token数据到本地存储
+                localStorage.setItem('itcast_manage_token', res.data.data.token)
                 // 进行路由跳转
                 this.$router.push({ name: 'home' })
               } else {
