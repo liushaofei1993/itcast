@@ -37,8 +37,8 @@ export default {
   data () {
     return {
       loginForm: {
-        username: '',
-        password: ''
+        username: 'admin',
+        password: '123456'
       },
       rules: {
         username: [
@@ -58,7 +58,9 @@ export default {
           login(this.loginForm)
             .then(res => {
               if (res.data.meta.status === 200) {
-                // 跳转页面
+                console.log(res)
+                // 进行路由跳转
+                this.$router.push({ name: 'home' })
               } else {
                 this.$message({
                   message: res.data.meta.msg,
