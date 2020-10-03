@@ -6,6 +6,8 @@ import VueRouter from 'vue-router'
 import Login from '@/views/login.vue'
 // 引入首页组件
 import Home from '@/views/home.vue'
+// 引入主体内容组件
+import Welcome from '@/views/welcome.vue'
 // 让vue使用vue-router
 Vue.use(VueRouter)
 
@@ -26,7 +28,17 @@ var router = new VueRouter({
     {
       name: 'home',
       path: '/home',
-      component: Home
+      component: Home,
+      // 添加路由重定向
+      redirect: { name: 'welcome' },
+      // 添加嵌套路由
+      children: [
+        {
+          name: 'welcome',
+          path: 'welcome',
+          component: Welcome
+        }
+      ]
     }
   ]
 })
