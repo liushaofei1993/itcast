@@ -8,6 +8,8 @@ import Login from '@/views/login.vue'
 import Home from '@/views/home.vue'
 // 引入主体内容组件
 import Welcome from '@/views/welcome.vue'
+// 引入用户列表组件
+import Users from '@/views/users/user.vue'
 // 让vue使用vue-router
 Vue.use(VueRouter)
 
@@ -37,6 +39,11 @@ var router = new VueRouter({
           name: 'welcome',
           path: 'welcome',
           component: Welcome
+        },
+        {
+          name: 'users',
+          path: 'users',
+          component: Users
         }
       ]
     }

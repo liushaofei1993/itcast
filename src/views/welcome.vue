@@ -1,5 +1,5 @@
 <template>
-  <div class="welcome">欢迎组件</div>
+  <div class="welcome">欢迎使用后台管理系统</div>
 </template>
 <script>
 export default {

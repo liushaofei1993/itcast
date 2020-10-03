@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <el-container>
+      <!-- 左侧导航菜单区域 -->
       <el-aside width="auto">
         <div class="logo"></div>
         <el-menu
@@ -18,7 +19,7 @@
               <i class="el-icon-location"></i>
               <span>用户管理</span>
             </template>
-            <el-menu-item index="/user">
+            <el-menu-item index="/home/users">
               <template slot="title">
                 <i class="el-icon-location"></i>
                 <span>用户列表</span>
@@ -48,11 +49,13 @@
         </el-menu>
       </el-aside>
       <el-container>
+        <!-- 右侧顶部区域 -->
         <el-header>
           <span class="myicon myicon-menu toggle-btn" @click="isCollapse = !isCollapse"></span>
           <span class="system-title">电商后台管理系统</span>
           <a href="javascript:;" class="exit">退出</a>
         </el-header>
+        <!-- 右侧主体部分 -->
         <el-main>
           <router-view></router-view>
         </el-main>

@@ -10,7 +10,7 @@ import router from '@/router/index.js'
 
 // 添加导航守卫
 router.beforeEach((to, from, next) => {
-  console.log(to)
+  // console.log(to)
   // 获取本地token数据
   var token = localStorage.getItem('itcast_manage_token')
   // 判断是否登陆过或当前跳转页面是否是登录页,是就继续跳转
