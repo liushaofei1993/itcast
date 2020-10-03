@@ -10,8 +10,12 @@ axios.interceptors.request.use(function (config) {
   // console.log(config)
   // 获取本地存储的token数据
   var token = localStorage.getItem('itcast_manage_token')
-  // 在请求头中添加 Authorization 字段,提供token令牌
-  config.headers.Authorization = token
+  // 如果是登录请求就不再向后台发送token令牌了,因为token是undefined
+  if (token) {
+    // 在请求头中添加 Authorization 字段,提供token令牌
+    config.headers.Authorization = token
+  }
+
   return config
 }, function (error) {
   // 对请求错误做些什么
