@@ -21,9 +21,9 @@
     <!-- 表格数据展示 -->
     <el-table :data="userList" style="width: 100%" border>
       <el-table-column type="index" width="50"> </el-table-column>
-      <el-table-column prop="date" label="日期" width="180"> </el-table-column>
-      <el-table-column prop="name" label="姓名" width="180"> </el-table-column>
-      <el-table-column prop="address" label="地址"> </el-table-column>
+      <el-table-column prop="username" label="姓名" width="180"> </el-table-column>
+      <el-table-column prop="email" label="邮箱" width="180"> </el-table-column>
+      <el-table-column prop="mobile" label="电话"> </el-table-column>
       <!-- 添加用户状态列 -->
       <el-table-column label="用户状态" width="70">
         <template slot-scope="">
@@ -67,7 +67,7 @@ export default {
       userObj: {
         query: '',
         pagenum: 1,
-        pagesize: 5
+        pagesize: 2
       },
       userList: []
     }
@@ -76,7 +76,10 @@ export default {
   mounted () {
     getAllUserList(this.userObj)
       .then((res) => {
-        console.log(res)
+        // console.log(res)
+        if (res.data.meta.status === 200) {
+          this.userList = res.data.data.users
+        }
       })
       .catch((err) => {
         console.log(err)
