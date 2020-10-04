@@ -57,7 +57,15 @@
       </el-table-column>
     </el-table>
     <!-- 分页 -->
-
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="userObj.pagenum"
+      :page-sizes="[1, 2, 3, 5]"
+      :page-size="userObj.pagesize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total">
+    </el-pagination>
   </div>
 </template>
 <script>
@@ -65,24 +73,44 @@ import { getAllUserList } from '@/api/user_index.js'
 export default {
   data () {
     return {
+      // 总记录数
+      total: 0,
       value: true,
       // 参数对象
       userObj: {
         query: '',
         pagenum: 1,
-        pagesize: 5
+        pagesize: 1
       },
       userList: []
     }
   },
   methods: {
+    // 切换每页显示记录数触发
+    handleSizeChange (val) {
+      console.log(`每页 ${val} 条`)
+      // 修改全局的userObj.pagesize的值为val
+      this.userObj.pagesize = val
+      // 重新发送(修改后的userObj)请求,获取数据
+      this.init()
+    },
+    // 切换当前页码触发
+    handleCurrentChange (val) {
+      console.log(`当前页: ${val}`)
+      // 修改全局的userObj.pagenum的值为val
+      this.userObj.pagenum = val
+      // 重新发送(修改后的userObj)请求,获取数据
+      this.init()
+    },
     // 数据初始化
     init () {
       getAllUserList(this.userObj)
         .then((res) => {
-        // console.log(res)
+          // console.log(res)
           if (res.data.meta.status === 200) {
             this.userList = res.data.data.users
+            // 获取总记录数
+            this.total = res.data.data.total
           }
         })
         .catch((err) => {
