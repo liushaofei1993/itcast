@@ -15,7 +15,7 @@ axios.interceptors.request.use(function (config) {
     // 在请求头中添加 Authorization 字段,提供token令牌
     config.headers.Authorization = token
   }
-
+  // 相当于我们对请求报文 进行了  属性的设置，之后返回添加了指定属性的请求报文 ，让你能够成功的发起请求
   return config
 }, function (error) {
   // 对请求错误做些什么

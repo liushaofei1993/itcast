@@ -13,8 +13,9 @@
         v-model="userObj.query"
         class="input-with-select"
         style="width: 300px; margin-right: 10px"
+        @keyup.enter.native="init"
       >
-        <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-button slot="append" icon="el-icon-search" @click="init"></el-button>
       </el-input>
       <el-button type="success" plain>添加用户</el-button>
     </div>
@@ -55,6 +56,8 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
+
   </div>
 </template>
 <script>
@@ -67,23 +70,28 @@ export default {
       userObj: {
         query: '',
         pagenum: 1,
-        pagesize: 2
+        pagesize: 5
       },
       userList: []
     }
   },
-  methods: {},
-  mounted () {
-    getAllUserList(this.userObj)
-      .then((res) => {
+  methods: {
+    // 数据初始化
+    init () {
+      getAllUserList(this.userObj)
+        .then((res) => {
         // console.log(res)
-        if (res.data.meta.status === 200) {
-          this.userList = res.data.data.users
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-      })
+          if (res.data.meta.status === 200) {
+            this.userList = res.data.data.users
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+  },
+  mounted () {
+    this.init()
   }
 }
 </script>
