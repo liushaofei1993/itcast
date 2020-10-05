@@ -15,14 +15,19 @@
         style="width: 300px; margin-right: 10px"
         @keyup.enter.native="init"
       >
-        <el-button slot="append" icon="el-icon-search" @click="init"></el-button>
+        <el-button
+          slot="append"
+          icon="el-icon-search"
+          @click="init"
+        ></el-button>
       </el-input>
-      <el-button type="success" plain>添加用户</el-button>
+      <el-button type="success" plain @click="addDialogFormVisible = true">添加用户</el-button>
     </div>
     <!-- 表格数据展示 -->
     <el-table :data="userList" style="width: 100%" border>
       <el-table-column type="index" width="50"> </el-table-column>
-      <el-table-column prop="username" label="姓名" width="180"> </el-table-column>
+      <el-table-column prop="username" label="姓名" width="180">
+      </el-table-column>
       <el-table-column prop="email" label="邮箱" width="180"> </el-table-column>
       <el-table-column prop="mobile" label="电话"> </el-table-column>
       <!-- 添加用户状态列 -->
@@ -64,17 +69,49 @@
       :page-sizes="[1, 2, 3, 5]"
       :page-size="userObj.pagesize"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="total">
+      :total="total"
+    >
     </el-pagination>
+    <!-- 对话框 -->
+    <el-dialog title="添加用户" :visible.sync="addDialogFormVisible">
+      <el-form :model="addForm" ref='addForm' :label-width="'80px'" :rules="rules">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addForm.username" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addForm.email" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="addForm.mobile" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addSubmit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-import { getAllUserList } from '@/api/user_index.js'
+import { getAllUserList, addUser } from '@/api/user_index.js'
 export default {
   data () {
     return {
+      // 控制对话框的显示和隐藏
+      addDialogFormVisible: false,
+      // 添加用户对应的数据对象
+      addForm: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
       // 总记录数
       total: 0,
+      // 状态列的状态
       value: true,
       // 参数对象
       userObj: {
@@ -82,10 +119,74 @@ export default {
         pagenum: 1,
         pagesize: 1
       },
-      userList: []
+      // 用户列表数据数组
+      userList: [],
+      // 添加表单验证规则
+      rules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          // 添加正则验证规则
+          { pattern: /\w+[@]\w+[.]\w+/, message: '请输入合法的电子邮箱', trigger: 'blur' }
+        ],
+        mobile: [
+          { required: true, message: '请输入手机号', trigger: 'blur' },
+          { pattern: /^1\d{10}$/, message: '请输入合法的手机号', trigger: 'blur' }
+        ]
+      }
     }
   },
   methods: {
+    // 添加用户
+    addSubmit () {
+      // 表单数据的二次验证
+      this.$refs.addForm.validate(valid => {
+        if (valid) {
+          // 验证通过,调用接口方法
+          addUser(this.addForm)
+            .then(res => {
+              console.log(res)
+              if (res.data.meta.status === 201) {
+                // 添加成功信息
+                this.$message({
+                  type: 'success',
+                  message: '数据添加成功'
+                })
+                // 隐藏对话框
+                this.addDialogFormVisible = false
+                // 重置表单元素数据
+                this.$refs.addForm.resetFields()
+                // 刷新
+                this.init()
+              } else {
+                // 添加失败,提示错误信息
+                this.$message({
+                  type: 'error',
+                  message: res.data.meta.msg
+                })
+              }
+            })
+            .catch(err => {
+              console.log(err)
+              this.$message({
+                type: 'error',
+                message: '添加用户失败,请再试一次'
+              })
+            })
+        } else {
+          this.$message({
+            type: 'error',
+            message: '数据输入不合法,请重新输入'
+          })
+          return false
+        }
+      })
+    },
     // 切换每页显示记录数触发
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
