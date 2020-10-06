@@ -30,3 +30,12 @@ export const addUser = (data) => {
     data
   })
 }
+
+// 编辑用户
+export const editUser = (data) => {
+  return axios({
+    url: `users/${data.id}`,
+    method: 'put',
+    data: { email: data.email, mobile: data.mobile }
+  })
+}
