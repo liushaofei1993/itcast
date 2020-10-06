@@ -62,7 +62,7 @@
             <el-button type="primary" icon="el-icon-rank"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
-            <el-button type="primary" icon="el-icon-delete"></el-button>
+            <el-button type="primary" icon="el-icon-delete" @click="del(scope.row.id)"></el-button>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -72,7 +72,7 @@
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="userObj.pagenum"
-      :page-sizes="[1, 2, 3, 5]"
+      :page-sizes="[1, 2, 3, 4]"
       :page-size="userObj.pagesize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
@@ -130,7 +130,7 @@
   </div>
 </template>
 <script>
-import { getAllUserList, addUser, editUser } from '@/api/user_index.js'
+import { getAllUserList, addUser, editUser, delUserById } from '@/api/user_index.js'
 export default {
   data () {
     return {
@@ -160,7 +160,7 @@ export default {
       userObj: {
         query: '',
         pagenum: 1,
-        pagesize: 5
+        pagesize: 4
       },
       // 用户列表数据数组
       userList: [],
@@ -191,6 +191,57 @@ export default {
     }
   },
   methods: {
+    // 通过id删除用户
+    del (id) {
+      this.$confirm(`此操作将永久删除id号为${id}的文件, 是否继续?`, '删除提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delUserById(id)
+          .then(res2 => {
+            // console.log(res2)
+            if (res2.data.meta.status === 200) {
+              this.$message({
+                type: 'success',
+                message: '删除成功'
+              })
+              // 如果代码到了这一步，说明这条记录已经删除了，只是还没有刷新
+
+              // 在删除之后刷新之前,进行判断,是因为: 刷新之后修改当前页码的值就晚了
+
+              // (只有在刷新之后,总记录数total才会重新赋值,与实际记录条数相同,
+              // 刷新之前,total值是比实际记录条数大1)
+
+              // 如果删除这条记录之后,当前页没有记录了,就跳转到上一页
+              // 如果当前页为1,删除之后记录条数为0,就赋值当前页为1,进行刷新
+
+              // if (Math.ceil((this.total - 1) / this.userObj.pagesize) < this.userObj.pagenum) {
+              //   this.userObj.pagenum--
+              // } else if (Math.ceil((this.total - 1) / this.userObj.pagesize) === 0) {
+              //   this.userObj.pagenum = 1
+              // }
+              // 三元表达式写法
+              this.userObj.pagenum = Math.ceil((this.total - 1) / this.userObj.pagesize) ? --this.userObj.pagenum : this.userObj.pagenum
+
+              // 刷新
+              this.init()
+            }
+          })
+          .catch(err2 => {
+            console.log(err2)
+            this.$message({
+              type: 'error',
+              message: '数据删除失败'
+            })
+          })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
     // 显示编辑对话框
     showEditDialog (row) {
       this.editDialogFormVisible = true
@@ -300,7 +351,7 @@ export default {
     init () {
       getAllUserList(this.userObj)
         .then((res) => {
-          // console.log(res)
+          console.log(res)
           if (res.data.meta.status === 200) {
             this.userList = res.data.data.users
             // 获取总记录数

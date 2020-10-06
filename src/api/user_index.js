@@ -39,3 +39,11 @@ export const editUser = (data) => {
     data: { email: data.email, mobile: data.mobile }
   })
 }
+
+// 根据id删除用户
+export const delUserById = (id) => {
+  return axios({
+    url: `users/${id}`,
+    method: 'delete'
+  })
+}
