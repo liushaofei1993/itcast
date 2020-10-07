@@ -34,12 +34,12 @@
       <el-table-column prop="mobile" label="电话"> </el-table-column>
       <!-- 添加用户状态列 -->
       <el-table-column label="用户状态" width="70">
-        <template slot-scope="">
+        <template slot-scope="scope">
           <el-switch
-            v-model="value"
+            v-model="scope.row.mg_state"
             active-color="#409eff"
-            inactive-color="#ff4949"
-          >
+            inactive-color="#dcdfe6"
+            @change="changeState(scope.row.id, scope.row.mg_state)">
           </el-switch>
         </template>
       </el-table-column>
@@ -130,7 +130,7 @@
   </div>
 </template>
 <script>
-import { getAllUserList, addUser, editUser, delUserById } from '@/api/user_index.js'
+import { getAllUserList, addUser, editUser, delUserById, updateUserState } from '@/api/user_index.js'
 export default {
   data () {
     return {
@@ -154,8 +154,6 @@ export default {
       },
       // 总记录数
       total: 0,
-      // 状态列的状态
-      value: true,
       // 参数对象
       userObj: {
         query: '',
@@ -191,6 +189,18 @@ export default {
     }
   },
   methods: {
+    // 修改用户状态
+    async changeState (id, type) {
+      // console.log(id, type)
+      const res = await updateUserState(id, type)
+      // console.log(res)
+      if (res.data.meta.status === 200) {
+        this.$message({
+          type: 'success',
+          message: '状态修改成功'
+        })
+      }
+    },
     // 通过id删除用户
     del (id) {
       this.$confirm(`此操作将永久删除id号为${id}的文件, 是否继续?`, '删除提示', {
