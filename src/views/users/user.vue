@@ -216,13 +216,13 @@ export default {
               // 如果删除这条记录之后,当前页没有记录了,就跳转到上一页
               // 如果当前页为1,删除之后记录条数为0,就赋值当前页为1,进行刷新
 
-              // if (Math.ceil((this.total - 1) / this.userObj.pagesize) < this.userObj.pagenum) {
-              //   this.userObj.pagenum--
-              // } else if (Math.ceil((this.total - 1) / this.userObj.pagesize) === 0) {
-              //   this.userObj.pagenum = 1
-              // }
-              // 三元表达式写法
-              this.userObj.pagenum = Math.ceil((this.total - 1) / this.userObj.pagesize) ? --this.userObj.pagenum : this.userObj.pagenum
+              if (Math.ceil((this.total - 1) / this.userObj.pagesize) < this.userObj.pagenum) {
+                this.userObj.pagenum--
+              } else if (Math.ceil((this.total - 1) / this.userObj.pagesize) === 0) {
+                this.userObj.pagenum = 1
+              }
+              // 三元表达式写法   (有缺陷不使用)
+              // this.userObj.pagenum = Math.ceil((this.total - 1) / this.userObj.pagesize) ? --this.userObj.pagenum : this.userObj.pagenum
 
               // 刷新
               this.init()
