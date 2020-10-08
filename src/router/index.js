@@ -10,6 +10,10 @@ import Home from '@/views/home.vue'
 import Welcome from '@/views/welcome.vue'
 // 引入用户列表组件
 import Users from '@/views/users/user.vue'
+// 引入角色列表组件
+import Roles from '@/views/rights/role.vue'
+// 引入权限列表组件
+import Rights from '@/views/rights/rights.vue'
 // 让vue使用vue-router
 Vue.use(VueRouter)
 
@@ -44,6 +48,16 @@ var router = new VueRouter({
           name: 'users',
           path: 'users',
           component: Users
+        },
+        {
+          name: 'roles',
+          path: 'roles',
+          component: Roles
+        },
+        {
+          name: 'rights',
+          path: 'rights',
+          component: Rights
         }
       ]
     }
