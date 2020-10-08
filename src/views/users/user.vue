@@ -39,7 +39,8 @@
             v-model="scope.row.mg_state"
             active-color="#409eff"
             inactive-color="#dcdfe6"
-            @change="changeState(scope.row.id, scope.row.mg_state)">
+            @change="changeState(scope.row.id, scope.row.mg_state)"
+          >
           </el-switch>
         </template>
       </el-table-column>
@@ -59,10 +60,14 @@
             content="分配角色"
             placement="top"
           >
-            <el-button type="primary" icon="el-icon-rank"></el-button>
+            <el-button type="primary" icon="el-icon-rank" @click="showGrantDialog(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
-            <el-button type="primary" icon="el-icon-delete" @click="del(scope.row.id)"></el-button>
+            <el-button
+              type="primary"
+              icon="el-icon-delete"
+              @click="del(scope.row.id)"
+            ></el-button>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -113,7 +118,12 @@
         :rules="rules"
       >
         <el-form-item label="用户名">
-          <el-input v-model="editForm.username" autocomplete="off" disabled style="width:100px"></el-input>
+          <el-input
+            v-model="editForm.username"
+            autocomplete="off"
+            disabled
+            style="width: 100px"
+          ></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="editForm.email" autocomplete="off"></el-input>
@@ -127,13 +137,59 @@
         <el-button type="primary" @click="editSubmit">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 分配角色对话框 -->
+    <el-dialog title="分配角色" :visible.sync="grantDialogFormVisible">
+      <el-form
+        :model="grantForm"
+        ref="grantForm"
+        :label-width="'80px'"
+        :rules="rules"
+      >
+        <el-form-item label="用户名:">
+          <span>{{ grantForm.username }}</span>
+        </el-form-item>
+        <el-form-item label="角色">
+          <el-select v-model="grantForm.rid" clearable placeholder="请选择">
+            <el-option
+              v-for="item in roleList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="grantDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="grantRole">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-import { getAllUserList, addUser, editUser, delUserById, updateUserState } from '@/api/user_index.js'
+import {
+  getAllUserList,
+  addUser,
+  editUser,
+  delUserById,
+  updateUserState,
+  grantUserRole
+} from '@/api/user_index.js'
+import { getAllRoleList } from '@/api/role_index.js'
 export default {
   data () {
     return {
+      // 角色列表数据
+      roleList: [],
+      // 分配角色对应的数据对象
+      grantForm: {
+        id: '',
+        rid: '',
+        username: ''
+      },
+      // 控制分配角色对话框的显示和隐藏
+      grantDialogFormVisible: false,
       // 控制添加用户对话框的显示和隐藏
       addDialogFormVisible: false,
       // 控制编辑用户对话框的显示和隐藏
@@ -189,11 +245,46 @@ export default {
     }
   },
   methods: {
+    // 给用户分配角色
+    async grantRole () {
+      console.log(this.grantForm)
+      // 判断一下是否选择了一个角色
+      if (!this.grantForm.rid) {
+        this.$message({
+          type: 'warning',
+          message: '请选择一个角色'
+        })
+      } else {
+        const res = await grantUserRole(this.grantForm)
+        // console.log(res)
+        if (res.data.meta.status === 200) {
+          this.$message({
+            type: 'success',
+            message: '角色设置成功'
+          })
+          // 隐藏对话框
+          this.grantDialogFormVisible = false
+          // 刷新页面:(分配角色默认展示信息是来源于自定义模板的scope.row,
+          // 分配角色完成不刷新,scope.row数据也不会刷新,那么角色默认展示信息是分配前的,而不是分配后的)
+          this.init()
+        }
+      }
+    },
+    // 展示分配角色对话框
+    showGrantDialog (row) {
+      console.log(row)
+      this.grantDialogFormVisible = true
+      this.grantForm.username = row.username
+      this.grantForm.id = row.id
+      this.grantForm.rid = row.rid
+    },
     // 修改用户状态
     async changeState (id, type) {
       // console.log(id, type)
+      // 调用方法获取操作结果
       const res = await updateUserState(id, type)
       // console.log(res)
+      // 对结果进行处理
       if (res.data.meta.status === 200) {
         this.$message({
           type: 'success',
@@ -203,54 +294,68 @@ export default {
     },
     // 通过id删除用户
     del (id) {
-      this.$confirm(`此操作将永久删除id号为${id}的文件, 是否继续?`, '删除提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        delUserById(id)
-          .then(res2 => {
-            // console.log(res2)
-            if (res2.data.meta.status === 200) {
-              this.$message({
-                type: 'success',
-                message: '删除成功'
-              })
-              // 如果代码到了这一步，说明这条记录已经删除了，只是还没有刷新
+      this.$confirm(
+        `此操作将永久删除id号为${id}的文件, 是否继续?`,
+        '删除提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+        .then(() => {
+          delUserById(id)
+            .then((res2) => {
+              // console.log(res2)
+              if (res2.data.meta.status === 200) {
+                this.$message({
+                  type: 'success',
+                  message: '删除成功'
+                })
+                // 如果代码到了这一步，说明这条记录已经删除了，只是还没有刷新
 
-              // 在删除之后刷新之前,进行判断,是因为: 刷新之后修改当前页码的值就晚了
+                // 在删除之后刷新之前,进行判断,是因为: 刷新之后修改当前页码的值就晚了
 
-              // (只有在刷新之后,总记录数total才会重新赋值,与实际记录条数相同,
-              // 刷新之前,total值是比实际记录条数大1)
+                // (只有在刷新之后,总记录数total才会重新赋值,与实际记录条数相同,
+                // 刷新之前,total值是比实际记录条数大1)
 
-              // 如果删除这条记录之后,当前页没有记录了,就跳转到上一页
-              // 如果当前页为1,删除之后记录条数为0,就赋值当前页为1,进行刷新
+                // 需求: 如果删除这条记录之后,当前页没有记录了,就跳转到上一页
+                //       如果当前页为1,删除之后记录条数为0,就赋值当前页为1,进行刷新
 
-              if (Math.ceil((this.total - 1) / this.userObj.pagesize) < this.userObj.pagenum) {
-                this.userObj.pagenum--
-              } else if (Math.ceil((this.total - 1) / this.userObj.pagesize) === 0) {
-                this.userObj.pagenum = 1
+                //  this.userobj.pagenum:2
+                // this.total :6
+                // 6-1 = 5 / 4 = 2
+                if (
+                  Math.ceil((this.total - 1) / this.userObj.pagesize) <
+                  this.userObj.pagenum
+                ) {
+                  this.userObj.pagenum--
+                } else if (
+                  Math.ceil((this.total - 1) / this.userObj.pagesize) === 0
+                ) {
+                  this.userObj.pagenum = 1
+                }
+                // 三元表达式写法   (有缺陷不使用)
+                // this.userObj.pagenum = Math.ceil((this.total - 1) / this.userObj.pagesize) ? --this.userObj.pagenum : this.userObj.pagenum
+
+                // 刷新
+                this.init()
               }
-              // 三元表达式写法   (有缺陷不使用)
-              // this.userObj.pagenum = Math.ceil((this.total - 1) / this.userObj.pagesize) ? --this.userObj.pagenum : this.userObj.pagenum
-
-              // 刷新
-              this.init()
-            }
-          })
-          .catch(err2 => {
-            console.log(err2)
-            this.$message({
-              type: 'error',
-              message: '数据删除失败'
             })
-          })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
+            .catch((err2) => {
+              console.log(err2)
+              this.$message({
+                type: 'error',
+                message: '数据删除失败'
+              })
+            })
         })
-      })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     },
     // 显示编辑对话框
     showEditDialog (row) {
@@ -263,7 +368,7 @@ export default {
     },
     // 编辑用户信息完成时提交
     editSubmit () {
-      this.$refs.editForm.validate(async valid => {
+      this.$refs.editForm.validate(async (valid) => {
         if (valid) {
           // 验证通过,调用接口方法
           const res = await editUser(this.editForm)
@@ -371,10 +476,19 @@ export default {
         .catch((err) => {
           console.log(err)
         })
+    },
+    // 获取角色列表初始化
+    async roleListInit () {
+      const res = await getAllRoleList()
+      console.log(res)
+      if (res.data.meta.status === 200) {
+        this.roleList = res.data.data
+      }
     }
   },
   mounted () {
     this.init()
+    this.roleListInit()
   }
 }
 </script>
