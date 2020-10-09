@@ -10,7 +10,7 @@
     <el-table
       ref="singleTable"
       :data="rightsList"
-      style="width: 100%"
+      style="width: 500px"
       border
     >
       <el-table-column type="index" width="50"> </el-table-column>
