@@ -14,34 +14,15 @@
           active-text-color="#ffd04b"
           :collapse="isCollapse"
         >
-          <el-submenu index="1">
+          <el-submenu :index="first.order + ''" v-for="first in menuList" :key="first.id">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>{{first.authName}}</span>
             </template>
-            <el-menu-item index="/home/users">
+            <el-menu-item :index="'/home/' + second.path" v-for="second in first.children" :key="second.id">
               <template slot="title">
                 <i class="el-icon-location"></i>
-                <span>用户列表</span>
-              </template>
-            </el-menu-item>
-          </el-submenu>
-
-          <el-submenu index="2">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>权限管理</span>
-            </template>
-            <el-menu-item index="/home/roles">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>角色列表</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="/home/rights">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>权限列表</span>
+                <span>{{second.authName}}</span>
               </template>
             </el-menu-item>
           </el-submenu>
@@ -64,11 +45,23 @@
   </div>
 </template>
 <script>
+import { getRightsLeftMenu } from '@/api/rights_index.js'
 export default {
   data () {
     return {
-      isCollapse: false
+      isCollapse: false,
+      menuList: []
     }
+  },
+  mounted () {
+    getRightsLeftMenu()
+      .then(res => {
+        console.log(res)
+        this.menuList = res.data.data
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
 }
 </script>

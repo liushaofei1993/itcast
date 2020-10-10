@@ -8,3 +8,10 @@ export const getAllRightsList = (type) => {
     url: `rights/${type}`
   })
 }
+
+// 获取当前登录用户左侧菜单项的权限
+export const getRightsLeftMenu = () => {
+  return axios({
+    url: 'menus'
+  })
+}
