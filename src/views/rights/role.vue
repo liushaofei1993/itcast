@@ -17,26 +17,31 @@
             :gutter="40"
             v-for="first in scope.row.children"
             :key="first.id"
-            style="margin-bottom: 10px;border-bottom: 1px dashed #ccc"
+            style="margin-bottom: 10px; border-bottom: 1px dashed #ccc"
           >
             <el-col :span="4">
               <el-tag
                 closable
                 type="success"
-                @close="delRightsById(scope.row,first.id)"
+                @close="delRightsById(scope.row, first.id)"
               >
                 {{ first.authName }}
               </el-tag>
             </el-col>
             <el-col :span="20">
-              <el-row :gutter="60" v-for="second in first.children" :key="second.id" style="margin-bottom: 10px">
+              <el-row
+                :gutter="60"
+                v-for="second in first.children"
+                :key="second.id"
+                style="margin-bottom: 10px"
+              >
                 <el-col :span="4">
                   <el-tag
                     closable
                     type="info"
-                    @close="delRightsById(scope.row,second.id)"
-                    >
-                      {{ second.authName }}
+                    @close="delRightsById(scope.row, second.id)"
+                  >
+                    {{ second.authName }}
                   </el-tag>
                 </el-col>
                 <el-col :span="20">
@@ -46,9 +51,9 @@
                     closable
                     type="warning"
                     style="margin: 0px 10px 5px 0px"
-                    @close="delRightsById(scope.row,thirdly.id)"
-                    >
-                      {{ thirdly.authName }}
+                    @close="delRightsById(scope.row, thirdly.id)"
+                  >
+                    {{ thirdly.authName }}
                   </el-tag>
                 </el-col>
               </el-row>
@@ -76,7 +81,11 @@
             content="角色授权"
             placement="top"
           >
-            <el-button type="primary" icon="el-icon-rank"></el-button>
+            <el-button
+              type="primary"
+              icon="el-icon-rank"
+              @click="showGrantDialog"
+            ></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
             <el-button type="primary" icon="el-icon-delete"></el-button>
@@ -84,17 +93,49 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 角色授权对话框 -->
+    <el-dialog title="角色授权" :visible.sync="grantDialogFormVisible">
+      <el-tree
+        :data="rightsList"
+        show-checkbox
+        node-key="id"
+        :default-expand-all="true"
+        :default-checked-keys="checkArr"
+        :props="defaultProps"
+      >
+      </el-tree>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="grantDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary">确 定 </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 import { getAllRoleList, delRightsByRoleId } from '@/api/role_index.js'
+import { getAllRightsList } from '@/api/rights_index.js'
 export default {
   data () {
     return {
-      roleList: []
+      grantDialogFormVisible: false,
+      roleList: [],
+      rightsList: [],
+      checkArr: [],
+      defaultProps: {
+        children: 'children',
+        label: 'authName'
+      }
     }
   },
   methods: {
+    // 展示授权对话框
+    async showGrantDialog () {
+      this.grantDialogFormVisible = true
+      // 获取权限列表数据
+      const res = await getAllRightsList('tree')
+      console.log(res)
+      this.rightsList = res.data.data
+    },
     // 删除指定角色的指定权限
     async delRightsById (row, rightsId) {
       // console.log(roleId, rightsId)
@@ -104,7 +145,7 @@ export default {
           type: 'success',
           message: res.data.meta.msg
         })
-        console.log(res)
+        // console.log(res)
         // this.roleListInit() // 绝对不允许刷新整个表格的数据，因为这样不利于用户体验
         row.children = res.data.data
       }
