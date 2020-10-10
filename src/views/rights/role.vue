@@ -71,7 +71,7 @@
       <el-table-column prop="roleDesc" label="描述"> </el-table-column>
       <!-- 添加操作列 -->
       <el-table-column label="操作">
-        <template slot-scope="">
+        <template slot-scope="scope">
           <el-tooltip class="item" effect="dark" content="编辑" placement="top">
             <el-button type="primary" icon="el-icon-edit"></el-button>
           </el-tooltip>
@@ -84,7 +84,7 @@
             <el-button
               type="primary"
               icon="el-icon-rank"
-              @click="showGrantDialog"
+              @click="showGrantDialog(scope.row)"
             ></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
@@ -129,12 +129,31 @@ export default {
   },
   methods: {
     // 展示授权对话框
-    async showGrantDialog () {
+    async showGrantDialog (row) {
       this.grantDialogFormVisible = true
       // 获取权限列表数据
       const res = await getAllRightsList('tree')
-      console.log(res)
+      // console.log(res)
       this.rightsList = res.data.data
+      console.log(row)
+      // 树状组件默认选中: 通过添加三级权限id到数组checkArr中
+      // 添加三级权限到id数组checkArr之前,要先清空数组,否则删除了权限,打开树状组件时,删除的权限默认还是会选中
+      this.checkArr.length = 0
+      // 判断是否有children属性且children数组是否有数据
+      if (row.children && row.children.length > 0) {
+        row.children.forEach(first => {
+          if (first.children && first.children.length > 0) {
+            first.children.forEach(second => {
+              if (second.children && second.children.length > 0) {
+                second.children.forEach(thirdly => {
+                  // 添加id到数组
+                  this.checkArr.push(thirdly.id)
+                })
+              }
+            })
+          }
+        })
+      }
     },
     // 删除指定角色的指定权限
     async delRightsById (row, rightsId) {
