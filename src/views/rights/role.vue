@@ -44,6 +44,7 @@
                     closable
                     type="warning"
                     style="margin: 0px 10px 5px 0px"
+                    @close="delRightsById(scope.row.id,thirdly.id)"
                     >
                       {{ thirdly.authName }}
                   </el-tag>
@@ -84,7 +85,7 @@
   </div>
 </template>
 <script>
-import { getAllRoleList } from '@/api/role_index.js'
+import { getAllRoleList, delRightsByRoleId } from '@/api/role_index.js'
 export default {
   data () {
     return {
@@ -92,6 +93,19 @@ export default {
     }
   },
   methods: {
+    // 删除指定角色的指定权限
+    async delRightsById (roleId, rightsId) {
+      console.log(roleId, rightsId)
+      const res = await delRightsByRoleId(roleId, rightsId)
+      console.log(res)
+      if (res.data.meta.status === 200) {
+        this.$message({
+          type: 'success',
+          message: res.data.meta.msg
+        })
+        this.roleListInit() // 绝对不允许刷新整个表格的数据，因为这样不利于用户体验
+      }
+    },
     // 角色列表数据初始化
     async roleListInit () {
       const res = await getAllRoleList()
