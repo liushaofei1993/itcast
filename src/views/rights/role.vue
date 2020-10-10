@@ -113,7 +113,7 @@
   </div>
 </template>
 <script>
-import { getAllRoleList, delRightsByRoleId } from '@/api/role_index.js'
+import { getAllRoleList, delRightsByRoleId, grantRightsById } from '@/api/role_index.js'
 import { getAllRightsList } from '@/api/rights_index.js'
 export default {
   data () {
@@ -131,31 +131,41 @@ export default {
   },
   methods: {
     // 实现角色授权的提交
-    grantSubmit () {
+    async grantSubmit () {
       // var obj = this.$refs.tree.getCheckedKeys()
       var arr = this.$refs.tree.getCheckedNodes()
       // var arr = this.$refs.tree.getHalfCheckedKeys()
       console.log(arr)
       // 我们有什么: arr:[{id:109,pid:'107,102'},{id:154,pid:'107,102'}]
-
       // 1.遍历数组arr,进行数据的拼接
       // 创建临时数组
       var temp = []
       arr.forEach(item => {
         temp.push(item.id + ',' + item.pid)
       })
-      console.log(temp) // ['109,107,102','154,107,102']
+      // console.log(temp) // ['109,107,102','154,107,102']
       // 2.将数组拼接成字符串
       var tempstr = temp.join(',')
-      console.log(tempstr) // '109,107,102,154,107,102'
+      // console.log(tempstr) // '109,107,102,154,107,102'
       // 3.将字符串分列成数组
       var temparr = tempstr.split(',')
-      console.log(temparr) // [109,107,102,154,107,102]
+      // console.log(temparr) // [109,107,102,154,107,102]
       // 4.数组去重
       var finalarr = [...new Set(temparr)]
-      console.log(finalarr) // ["102","107","109","154"]
-
+      // console.log(finalarr) // ["102","107","109","154"]
       // 我们要什么: '102,107,109,154'
+
+      // 调用接口方法实现角色权限的分配
+      const res = await grantRightsById(this.roleId, finalarr.join(','))
+      console.log(res)
+      if (res.data.meta.status === 200) {
+        this.$message({
+          type: 'success',
+          message: res.data.meta.msg
+        })
+        this.grantDialogFormVisible = false
+        this.roleListInit()
+      }
     },
     // 展示授权对话框
     async showGrantDialog (row) {
