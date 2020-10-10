@@ -23,6 +23,7 @@
               <el-tag
                 closable
                 type="success"
+                @close="delRightsById(scope.row,first.id)"
               >
                 {{ first.authName }}
               </el-tag>
@@ -33,6 +34,7 @@
                   <el-tag
                     closable
                     type="info"
+                    @close="delRightsById(scope.row,second.id)"
                     >
                       {{ second.authName }}
                   </el-tag>
@@ -44,7 +46,7 @@
                     closable
                     type="warning"
                     style="margin: 0px 10px 5px 0px"
-                    @close="delRightsById(scope.row.id,thirdly.id)"
+                    @close="delRightsById(scope.row,thirdly.id)"
                     >
                       {{ thirdly.authName }}
                   </el-tag>
@@ -94,16 +96,17 @@ export default {
   },
   methods: {
     // 删除指定角色的指定权限
-    async delRightsById (roleId, rightsId) {
-      console.log(roleId, rightsId)
-      const res = await delRightsByRoleId(roleId, rightsId)
-      console.log(res)
+    async delRightsById (row, rightsId) {
+      // console.log(roleId, rightsId)
+      const res = await delRightsByRoleId(row.id, rightsId)
       if (res.data.meta.status === 200) {
         this.$message({
           type: 'success',
           message: res.data.meta.msg
         })
-        this.roleListInit() // 绝对不允许刷新整个表格的数据，因为这样不利于用户体验
+        console.log(res)
+        // this.roleListInit() // 绝对不允许刷新整个表格的数据，因为这样不利于用户体验
+        row.children = res.data.data
       }
     },
     // 角色列表数据初始化
