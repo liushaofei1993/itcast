@@ -102,11 +102,12 @@
         :default-expand-all="true"
         :default-checked-keys="checkArr"
         :props="defaultProps"
+        ref="tree"
       >
       </el-tree>
       <div slot="footer" class="dialog-footer">
         <el-button @click="grantDialogFormVisible = false">取 消</el-button>
-        <el-button type="primary">确 定 </el-button>
+        <el-button type="primary" @click="grantSubmit">确 定 </el-button>
       </div>
     </el-dialog>
   </div>
@@ -117,6 +118,7 @@ import { getAllRightsList } from '@/api/rights_index.js'
 export default {
   data () {
     return {
+      roleId: '',
       grantDialogFormVisible: false,
       roleList: [],
       rightsList: [],
@@ -128,8 +130,37 @@ export default {
     }
   },
   methods: {
+    // 实现角色授权的提交
+    grantSubmit () {
+      // var obj = this.$refs.tree.getCheckedKeys()
+      var arr = this.$refs.tree.getCheckedNodes()
+      // var arr = this.$refs.tree.getHalfCheckedKeys()
+      console.log(arr)
+      // 我们有什么: arr:[{id:109,pid:'107,102'},{id:154,pid:'107,102'}]
+
+      // 1.遍历数组arr,进行数据的拼接
+      // 创建临时数组
+      var temp = []
+      arr.forEach(item => {
+        temp.push(item.id + ',' + item.pid)
+      })
+      console.log(temp) // ['109,107,102','154,107,102']
+      // 2.将数组拼接成字符串
+      var tempstr = temp.join(',')
+      console.log(tempstr) // '109,107,102,154,107,102'
+      // 3.将字符串分列成数组
+      var temparr = tempstr.split(',')
+      console.log(temparr) // [109,107,102,154,107,102]
+      // 4.数组去重
+      var finalarr = [...new Set(temparr)]
+      console.log(finalarr) // ["102","107","109","154"]
+
+      // 我们要什么: '102,107,109,154'
+    },
     // 展示授权对话框
     async showGrantDialog (row) {
+      // 获取角色id,方便后期的角色分配提交时的参数获取
+      this.roleId = row.id
       this.grantDialogFormVisible = true
       // 获取权限列表数据
       const res = await getAllRightsList('tree')
