@@ -6,6 +6,12 @@
       <el-breadcrumb-item><a href="/">权限管理</a></el-breadcrumb-item>
       <el-breadcrumb-item>角色列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 添加角色 -->
+    <div style="margin: 15px 0">
+      <el-button type="primary" plain @click="addDialogFormVisible = true"
+        >添加角色</el-button
+      >
+    </div>
     <!-- 表格数据展示 -->
     <el-table :data="roleList" style="width: 100%" border>
       <!-- type: expand --说明这一列的内容在后期可以展开或合并
@@ -110,14 +116,44 @@
         <el-button type="primary" @click="grantSubmit">确 定 </el-button>
       </div>
     </el-dialog>
+    <!-- 添加角色对话框 -->
+    <el-dialog title="添加角色" :visible.sync="addDialogFormVisible">
+      <el-form :model="addRoleForm" :rules = "rules" ref="addRoleForm" :label-width="'80px'">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="addRoleForm.roleName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述">
+          <el-input v-model="addRoleForm.roleDesc" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addRoleSubmit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-import { getAllRoleList, delRightsByRoleId, grantRightsById } from '@/api/role_index.js'
+import {
+  getAllRoleList,
+  delRightsByRoleId,
+  grantRightsById,
+  addRole
+} from '@/api/role_index.js'
 import { getAllRightsList } from '@/api/rights_index.js'
 export default {
   data () {
     return {
+      addRoleForm: {
+        roleName: '',
+        roleDesc: ''
+      },
+      addDialogFormVisible: false,
+      rules: {
+        roleName: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' }
+        ]
+      },
       roleId: '',
       grantDialogFormVisible: false,
       roleList: [],
@@ -130,6 +166,30 @@ export default {
     }
   },
   methods: {
+    // 实现角色的添加
+    addRoleSubmit (addRoleForm) {
+      this.$refs.addRoleForm.validate(async valid => {
+        if (valid) {
+          // 调用接口方法添加角色数据
+          const res = await addRole(this.addRoleForm)
+          console.log(res)
+          if (res.data.meta.status === 201) {
+            this.$message({
+              type: 'success',
+              message: res.data.meta.msg
+            })
+            this.addDialogFormVisible = false
+            this.roleListInit()
+          }
+        } else {
+          this.$message({
+            type: 'error',
+            message: '数据输入不合法,请重新输入'
+          })
+          return false
+        }
+      })
+    },
     // 实现角色授权的提交
     async grantSubmit () {
       // var obj = this.$refs.tree.getCheckedKeys()
@@ -140,7 +200,7 @@ export default {
       // 1.遍历数组arr,进行数据的拼接
       // 创建临时数组
       var temp = []
-      arr.forEach(item => {
+      arr.forEach((item) => {
         temp.push(item.id + ',' + item.pid)
       })
       // console.log(temp) // ['109,107,102','154,107,102']
@@ -182,11 +242,11 @@ export default {
       this.checkArr.length = 0
       // 判断是否有children属性且children数组是否有数据
       if (row.children && row.children.length > 0) {
-        row.children.forEach(first => {
+        row.children.forEach((first) => {
           if (first.children && first.children.length > 0) {
-            first.children.forEach(second => {
+            first.children.forEach((second) => {
               if (second.children && second.children.length > 0) {
-                second.children.forEach(thirdly => {
+                second.children.forEach((thirdly) => {
                   // 添加id到数组
                   this.checkArr.push(thirdly.id)
                 })
