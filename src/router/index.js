@@ -14,6 +14,10 @@ import Users from '@/views/users/user.vue'
 import Roles from '@/views/rights/role.vue'
 // 引入权限列表组件
 import Rights from '@/views/rights/rights.vue'
+// 引入商品,列表,添加商品组件
+import Goods from '@/views/goods/goods.vue'
+import List from '@/views/goods/list.vue'
+import Add from '@/views/goods/add.vue'
 // 让vue使用vue-router
 Vue.use(VueRouter)
 
@@ -58,6 +62,24 @@ var router = new VueRouter({
           name: 'rights',
           path: 'rights',
           component: Rights
+        },
+        {
+          name: 'goods',
+          path: 'goods',
+          component: Goods,
+          redirect: { name: 'list' },
+          children: [
+            {
+              name: 'list',
+              path: 'list',
+              component: List
+            },
+            {
+              name: 'add',
+              path: 'add',
+              component: Add
+            }
+          ]
         }
       ]
     }
