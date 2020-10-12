@@ -106,7 +106,7 @@ export default {
       return { Authorization: token }
     },
     // 文件上传成功时触发的钩子函数
-    handleSuccess (response, file, fileList) {
+    handleSuccess (response) {
       console.log(response)
       if (response.meta.status === 200) {
         // 我们需要的上传成功的文件数据就在response中,我们要将上传成功后的文件路径(相对路径)存储到addForm的pics中
@@ -115,7 +115,17 @@ export default {
     },
     // 文件移除的时候触发
     handleRemove (file, fileList) {
-      console.log(file, fileList)
+      // file就是用户当前删除的图片对象
+      console.log(file)
+      // 存储当前移除的文件的路径
+      var current = file.response.data.tmp_path
+      // 遍历数组pics,找到与移除文件路径相同的对象,删除它,实现添加商品时正确的上传文件的数量
+      for (var i = 0; i < this.addForm.pics.length; i++) {
+        if (this.addForm.pics[i].pic === current) {
+          this.addForm.pics.splice(i, 1)
+          break // 添加break可以实现: 在数组pics中遍历到移除的文件了,删除后就不再向下遍历了
+        }
+      }
     },
     // 文件预览的时候触发
     handlePreview (file) {
