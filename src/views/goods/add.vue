@@ -7,7 +7,7 @@
       <el-breadcrumb-item>商品添加</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 步骤条 -->
-    <el-steps :active="active" finish-status="success">
+    <el-steps :active="activeName-0" finish-status="success">
       <el-step title="步骤 1"></el-step>
       <el-step title="步骤 2"></el-step>
       <el-step title="步骤 3"></el-step>
@@ -15,11 +15,12 @@
       <el-step title="步骤 5"></el-step>
     </el-steps>
     <!-- 标签页 -->
-    <el-tabs v-model="activeName" @tab-click="handleClick" tab-position="left">
-      <el-tab-pane label="用户管理" name="first">用户管理</el-tab-pane>
-      <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
-      <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
-      <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
+    <el-tabs v-model="activeName" @tab-click="handleClick" tab-position="left" style="margin-top:20px">
+      <el-tab-pane label="用户管理" name="0">用户管理</el-tab-pane>
+      <el-tab-pane label="配置管理" name="1">配置管理</el-tab-pane>
+      <el-tab-pane label="角色管理" name="2">角色管理</el-tab-pane>
+      <el-tab-pane label="定时任务补偿" name="3">定时任务补偿</el-tab-pane>
+      <el-tab-pane label="定时任务补偿" name="4">定时任务补偿</el-tab-pane>
   </el-tabs>
   </div>
 </template>
@@ -27,8 +28,7 @@
 export default {
   data () {
     return {
-      active: 0,
-      activeName: 'first'
+      activeName: '0'
     }
   },
   methods: {
