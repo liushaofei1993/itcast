@@ -40,7 +40,9 @@
             <el-cascader
               :options="cateList"
               clearable
-              :model="addForm.goods_cat"
+              v-model="addForm.goods_cat"
+              :props="cateprops"
+              @change="cateSelect"
             ></el-cascader>
           </el-form-item>
         </el-tab-pane>
@@ -53,6 +55,7 @@
   </div>
 </template>
 <script>
+import { getAllCateList } from '@/api/cate_index.js'
 export default {
   data () {
     return {
@@ -67,13 +70,35 @@ export default {
         pics: [],
         attrs: []
       },
-      cateList: []
+      cateList: [],
+      cateprops: {
+        label: 'cat_name',
+        value: 'cat_id',
+        children: 'children',
+        checkStrictly: true
+      }
     }
   },
   methods: {
+    cateSelect (obj) {
+      console.log(obj)
+      console.log(this.addForm.goods_cat.join(','))
+    },
     handleClick (v) {
       // console.log(v)
     }
+  },
+  mounted () {
+    getAllCateList([1, 2, 3])
+      .then(res => {
+        console.log(res)
+        if (res.data.meta.status === 200) {
+          this.cateList = res.data.data
+        }
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
 }
 </script>
