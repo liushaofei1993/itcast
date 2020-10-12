@@ -48,7 +48,20 @@
         </el-tab-pane>
         <el-tab-pane label="商品参数" name="1">配置管理</el-tab-pane>
         <el-tab-pane label="商品属性" name="2">角色管理</el-tab-pane>
-        <el-tab-pane label="商品图片" name="3">定时任务补偿</el-tab-pane>
+        <el-tab-pane label="商品图片" name="3">
+          <el-upload
+            class="upload-demo"
+            action="http://localhost:8888/api/private/v1/upload"
+            :headers="getToken()"
+            :on-preview="handlePreview"
+            :on-remove="handleRemove"
+            :on-success="handleSuccess"
+            :file-list="fileList"
+            list-type="picture">
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+          </el-upload>
+        </el-tab-pane>
         <el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
       </el-tabs>
     </el-form>
@@ -59,6 +72,8 @@ import { getAllCateList } from '@/api/cate_index.js'
 export default {
   data () {
     return {
+      // 上传文件的列表
+      fileList: [],
       activeName: '0',
       addForm: {
         goods_name: '',
@@ -80,6 +95,23 @@ export default {
     }
   },
   methods: {
+    // 设置上传的请求头,为方便扩展,使用函数返回对象的形式
+    getToken () {
+      var token = localStorage.getItem('itcast_manage_token')
+      return { Authorization: token }
+    },
+    // 文件上传成功时触发的钩子函数
+    handleSuccess () {
+
+    },
+    // 文件移除的时候触发
+    handleRemove (file, fileList) {
+      console.log(file, fileList)
+    },
+    // 文件预览的时候触发
+    handlePreview (file) {
+      console.log(file)
+    },
     cateSelect (obj) {
       console.log(obj)
       console.log(this.addForm.goods_cat.join(','))
