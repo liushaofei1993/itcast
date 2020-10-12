@@ -7,33 +7,55 @@
       <el-breadcrumb-item>商品添加</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 步骤条 -->
-    <el-steps :active="activeName-0" finish-status="success">
+    <el-steps :active="activeName - 0" finish-status="success">
       <el-step title="步骤 1"></el-step>
       <el-step title="步骤 2"></el-step>
       <el-step title="步骤 3"></el-step>
       <el-step title="步骤 4"></el-step>
       <el-step title="步骤 5"></el-step>
     </el-steps>
-    <!-- 标签页 -->
-    <el-tabs v-model="activeName" @tab-click="handleClick" tab-position="left" style="margin-top:20px">
-      <el-tab-pane label="用户管理" name="0">用户管理</el-tab-pane>
-      <el-tab-pane label="配置管理" name="1">配置管理</el-tab-pane>
-      <el-tab-pane label="角色管理" name="2">角色管理</el-tab-pane>
-      <el-tab-pane label="定时任务补偿" name="3">定时任务补偿</el-tab-pane>
-      <el-tab-pane label="定时任务补偿" name="4">定时任务补偿</el-tab-pane>
-  </el-tabs>
+    <!-- 添加表单 -->
+    <el-form :model="addForm" ref="addForm" label-width="80px">
+      <!-- 标签页 -->
+      <el-tabs
+        v-model="activeName"
+        @tab-click="handleClick"
+        tab-position="left"
+        style="margin-top: 20px"
+      >
+        <el-tab-pane label="基本信息" name="0">
+          <el-form-item label="商品名称">
+            <el-input v-model="addForm.goods_name"></el-input>
+          </el-form-item>
+        </el-tab-pane>
+        <el-tab-pane label="商品参数" name="1">配置管理</el-tab-pane>
+        <el-tab-pane label="商品属性" name="2">角色管理</el-tab-pane>
+        <el-tab-pane label="商品图片" name="3">定时任务补偿</el-tab-pane>
+        <el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
+      </el-tabs>
+    </el-form>
   </div>
 </template>
 <script>
 export default {
   data () {
     return {
-      activeName: '0'
+      activeName: '0',
+      addForm: {
+        goods_name: '',
+        goods_cat: '',
+        goods_price: 0,
+        goods_number: 0,
+        goods_weight: 0,
+        goods_introduce: '',
+        pics: [],
+        attrs: []
+      }
     }
   },
   methods: {
     handleClick (v) {
-      console.log(v)
+      // console.log(v)
     }
   }
 }
