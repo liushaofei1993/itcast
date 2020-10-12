@@ -13,10 +13,12 @@
         v-model="goodsObj.query"
         class="input-with-select"
         style="width: 300px; margin-right: 10px"
+        @keyup.enter.native="searchGoods"
       >
         <el-button
           slot="append"
           icon="el-icon-search"
+          @click="searchGoods"
         ></el-button>
       </el-input>
       <el-button type="success" plain @click="$router.push({name: 'add'})">添加商品</el-button>
@@ -24,13 +26,21 @@
     <!-- 表格数据展示 -->
     <el-table :data="goodsList" style="width: 100%" border>
       <el-table-column type="index" width="50"> </el-table-column>
-      <el-table-column prop="goods_name" label="商品名称" width="180"></el-table-column>
-      <el-table-column prop="goods_price" label="商品价格" width="180"> </el-table-column>
-      <el-table-column prop="goods_state" label="商品状态"> </el-table-column>
-      <el-table-column prop="goods_weight" label="商品重量"> </el-table-column>
-      <el-table-column prop="add_time" label="创建时间"> </el-table-column>
+      <el-table-column prop="goods_name" label="商品名称"></el-table-column>
+      <el-table-column prop="goods_price" label="商品价格" width="120"> </el-table-column>
+      <el-table-column prop="" label="商品状态" width="120">
+        <template slot-scope="scope">
+          {{scope.row.goods_state | stateFormat}}
+        </template>
+      </el-table-column>
+      <el-table-column prop="goods_weight" label="商品重量" width="120"> </el-table-column>
+      <el-table-column prop="" label="创建时间" width="150">
+        <template slot-scope="scope">
+          {{scope.row.add_time | timeFormat}}
+        </template>
+      </el-table-column>
       <!-- 添加操作列 -->
-      <el-table-column label="操作" width="220">
+      <el-table-column label="操作" width="280">
         <template slot-scope="">
           <el-tooltip class="item" effect="dark" content="编辑" placement="top">
             <el-button
@@ -60,7 +70,7 @@
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="goodsObj.pagenum"
-      :page-sizes="[ 2, 4,6,8,10]"
+      :page-sizes="[ 10, 20, 30, 40, 50,]"
       :page-size="goodsObj.pagesize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
@@ -69,6 +79,7 @@
   </div>
 </template>
 <script>
+import { getAllGoodsList } from '@/api/goods_index.js'
 export default {
   data () {
     return {
@@ -81,21 +92,58 @@ export default {
       goodsList: []
     }
   },
+  filters: {
+    timeFormat (time) {
+      time = new Date(time * 1000)
+      // console.log(time)
+      return time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate()
+    },
+    stateFormat (state) {
+      if (state === 1) {
+        return '上架'
+      } else if (state === 2) {
+        return '下架'
+      } else {
+        return ''
+      }
+    }
+  },
   methods: {
+    // 搜索功能
+    searchGoods () {
+      this.goodsListInit()
+    },
     // 切换每页显示记录数触发
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
-      // 修改全局的userObj.pagesize的值为val
+      // 修改全局的goodsObj.pagesize的值为val
       this.goodsObj.pagesize = val
-      // 重新发送(修改后的userObj)请求,获取数据
+      // 重新发送(修改后的goodsObj)请求,获取数据
+      this.goodsListInit()
     },
     // 切换当前页码触发
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`)
-      // 修改全局的userObj.pagenum的值为val
+      // 修改全局的goodsObj.pagenum的值为val
       this.goodsObj.pagenum = val
-      // 重新发送(修改后的userObj)请求,获取数据
+      // 重新发送(修改后的goodsObj)请求,获取数据
+      this.goodsListInit()
+    },
+    // 商品列表数据初始化
+    goodsListInit () {
+      getAllGoodsList(this.goodsObj)
+        .then(res => {
+          console.log(res)
+          this.goodsList = res.data.data.goods
+          this.total = res.data.data.total
+        })
+        .catch(err => {
+          console.log(err)
+        })
     }
+  },
+  mounted () {
+    this.goodsListInit()
   }
 }
 </script>

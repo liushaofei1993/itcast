@@ -56,7 +56,7 @@ export default {
   mounted () {
     getRightsLeftMenu()
       .then(res => {
-        console.log(res)
+        // console.log(res)
         this.menuList = res.data.data
       })
       .catch(err => {
