@@ -15,7 +15,7 @@
       <el-step title="步骤 5"></el-step>
     </el-steps>
     <!-- 添加表单 -->
-    <el-form :model="addForm" ref="addForm" label-width="80px">
+    <el-form :model="addForm" ref="addForm" label-width="120px">
       <!-- 标签页 -->
       <el-tabs
         v-model="activeName"
@@ -26,6 +26,22 @@
         <el-tab-pane label="基本信息" name="0">
           <el-form-item label="商品名称">
             <el-input v-model="addForm.goods_name"></el-input>
+          </el-form-item>
+          <el-form-item label="商品价格">
+            <el-input v-model="addForm.goods_name"></el-input>
+          </el-form-item>
+          <el-form-item label="商品重量">
+            <el-input v-model="addForm.goods_name"></el-input>
+          </el-form-item>
+          <el-form-item label="商品数量">
+            <el-input v-model="addForm.goods_name"></el-input>
+          </el-form-item>
+          <el-form-item label="商品分类">
+            <el-cascader
+              :options="cateList"
+              clearable
+              :model="addForm.goods_cat"
+            ></el-cascader>
           </el-form-item>
         </el-tab-pane>
         <el-tab-pane label="商品参数" name="1">配置管理</el-tab-pane>
@@ -50,7 +66,8 @@ export default {
         goods_introduce: '',
         pics: [],
         attrs: []
-      }
+      },
+      cateList: []
     }
   },
   methods: {
