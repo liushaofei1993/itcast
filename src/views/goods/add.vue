@@ -64,6 +64,7 @@
         </el-tab-pane>
         <el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
       </el-tabs>
+      <el-button type="primary" plain class="fr" @click="addGoods">添加商品</el-button>
     </el-form>
   </div>
 </template>
@@ -95,14 +96,22 @@ export default {
     }
   },
   methods: {
+    // 添加商品
+    addGoods () {
+      console.log(this.addForm.pics)
+    },
     // 设置上传的请求头,为方便扩展,使用函数返回对象的形式
     getToken () {
       var token = localStorage.getItem('itcast_manage_token')
       return { Authorization: token }
     },
     // 文件上传成功时触发的钩子函数
-    handleSuccess () {
-
+    handleSuccess (response, file, fileList) {
+      console.log(response)
+      if (response.meta.status === 200) {
+        // 我们需要的上传成功的文件数据就在response中,我们要将上传成功后的文件路径(相对路径)存储到addForm的pics中
+        this.addForm.pics.push({ pic: response.data.tmp_path })
+      }
     },
     // 文件移除的时候触发
     handleRemove (file, fileList) {
