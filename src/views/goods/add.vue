@@ -53,6 +53,7 @@
             class="upload-demo"
             action="http://localhost:8888/api/private/v1/upload"
             :headers="getToken()"
+            :before-upload="handleBefore"
             :on-preview="handlePreview"
             :on-remove="handleRemove"
             :on-success="handleSuccess"
@@ -96,6 +97,18 @@ export default {
     }
   },
   methods: {
+    // 文件上传之前的钩子,可以对上传文件进行合法性判断
+    // file就是你当前所选择的文件对象
+    handleBefore (file) {
+      console.log(file)
+      if (file.type.indexOf('image/') !== 0) {
+        this.$message.error('请上传图片')
+        return false // 这一步会触发handleRemove,所以在handleRemove里面需要判断file.response
+      } else if (file.size >= (500 * 1024)) {
+        this.$message.error('图片过大,请换一张')
+        return false
+      }
+    },
     // 添加商品
     addGoods () {
       console.log(this.addForm.pics)
@@ -117,6 +130,10 @@ export default {
     handleRemove (file, fileList) {
       // file就是用户当前删除的图片对象
       console.log(file)
+      // 判断当上传文件类型不正确时,没有file.response,就不向下执行
+      if (!file.response) {
+        return
+      }
       // 存储当前移除的文件的路径
       var current = file.response.data.tmp_path
       // 遍历数组pics,找到与移除文件路径相同的对象,删除它,实现添加商品时正确的上传文件的数量
