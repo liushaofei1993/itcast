@@ -63,15 +63,27 @@
             <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
           </el-upload>
         </el-tab-pane>
-        <el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
+        <el-tab-pane label="商品内容" name="4">
+         <quill-editor class="myquill" v-model="addForm.goods_introduce"></quill-editor>
+        </el-tab-pane>
       </el-tabs>
       <el-button type="primary" plain class="fr" @click="addGoods">添加商品</el-button>
     </el-form>
   </div>
 </template>
 <script>
+// 先下载  npm i vue-quill-editor --save
+// 再引入样式
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+// 引模块
+import { quillEditor } from 'vue-quill-editor'
 import { getAllCateList } from '@/api/cate_index.js'
 export default {
+  components: {
+    quillEditor
+  },
   data () {
     return {
       // 上传文件的列表
@@ -111,7 +123,7 @@ export default {
     },
     // 添加商品
     addGoods () {
-      console.log(this.addForm.pics)
+      console.log(this.addForm)
     },
     // 设置上传的请求头,为方便扩展,使用函数返回对象的形式
     getToken () {
@@ -171,4 +183,9 @@ export default {
 }
 </script>
 <style lang="less" scoped>
+.myquill {
+  // height: 400px;
+  border-bottom: 1px solid #ccc;
+  // overflow: scroll;
+}
 </style>
