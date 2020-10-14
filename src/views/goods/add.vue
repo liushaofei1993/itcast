@@ -28,13 +28,13 @@
             <el-input v-model="addForm.goods_name"></el-input>
           </el-form-item>
           <el-form-item label="商品价格">
-            <el-input v-model="addForm.goods_name"></el-input>
+            <el-input v-model="addForm.goods_price"></el-input>
           </el-form-item>
           <el-form-item label="商品重量">
-            <el-input v-model="addForm.goods_name"></el-input>
+            <el-input v-model="addForm.goods_weight"></el-input>
           </el-form-item>
           <el-form-item label="商品数量">
-            <el-input v-model="addForm.goods_name"></el-input>
+            <el-input v-model="addForm.goods_number"></el-input>
           </el-form-item>
           <el-form-item label="商品分类">
             <el-cascader
@@ -52,13 +52,13 @@
             v-for="first in cateParamsDynamic"
             :key="first.attr_id"
           >
-            <el-checkbox-group v-model="cateCheckList">
+          <!-- 如果v-model绑定了一个公共数组cateCheckList,那么当有多组复选框时,会造成多组复选框都指向同一个数组,同时会造成只有最后一组数据,大麻烦啊!所以我们要为每一组绑定一个独立的数据成员,而循环的数据体first中有一个属性attr_vals,他是每一个对象中特有的数组,绑定它就可以实现: 取消勾选多选框可以影响到数据体first的属性attr_vals数组的数据.  然而需要注意的是checkbox中的checked属性会勾选中复选框,与group中的v-model属性相冲突,会造成绑定的值为true,取消checked属性即可 -->
+            <el-checkbox-group v-model="first.attr_vals">
               <el-checkbox
                 :label="second"
                 v-for="(second, index) in first.attr_vals"
                 :key="index"
                 border
-                checked
               ></el-checkbox
               >\
             </el-checkbox-group>
@@ -127,14 +127,13 @@ export default {
       addForm: {
         goods_name: '',
         goods_cat: '',
-        goods_price: 0,
-        goods_number: 0,
-        goods_weight: 0,
+        goods_price: '',
+        goods_number: '',
+        goods_weight: '',
         goods_introduce: '',
         pics: [],
         attrs: []
       },
-      cateCheckList: [],
       cateParamsDynamic: [], // 动态参数
       cateParamsStatic: [], // 静态参数
       cateList: [],
@@ -161,6 +160,18 @@ export default {
     },
     // 添加商品
     addGoods () {
+      // console.log(this.addForm)
+      // console.log(this.cateParamsDynamic)
+      // 搜集attrs数据
+      // 遍历动态参数cateParamsDynamic,将attr_id和attr_value的值添加到addForm.attrs中
+      for (var i = 0; i < this.cateParamsDynamic.length; i++) {
+        var id = this.cateParamsDynamic[i].attr_id
+        for (var j = 0; j < this.cateParamsDynamic[i].attr_vals.length; j++) {
+          this.addForm.attrs.push({ attr_id: id, attr_value: this.cateParamsDynamic[i].attr_vals[j] })
+        }
+      }
+      // 对参数addForm.goods_cat进行处理: 转成以,分割的字符串
+      this.addForm.goods_cat = this.addForm.goods_cat.join(',')
       console.log(this.addForm)
     },
     // 设置上传的请求头,为方便扩展,使用函数返回对象的形式
@@ -228,8 +239,10 @@ export default {
           // console.log(this.cateParamsDynamic[0].attr_vals)
           this.cateParamsDynamic.forEach((item) => {
             item.attr_vals = item.attr_vals ? item.attr_vals.split(',') : []
+            // item.attr_vals = [...item.attr_vals]
+            // console.log(item.attr_vals instanceof Array)
           })
-          console.log(this.cateParamsDynamic[0].attr_vals)
+          // console.log(this.cateParamsDynamic[0].attr_vals)
         } else {
           // 如果是2,就获取静态参数
           const res = await getAllCateParamsList(
