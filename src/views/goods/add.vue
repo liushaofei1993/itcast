@@ -47,13 +47,33 @@
           </el-form-item>
         </el-tab-pane>
         <el-tab-pane label="商品参数" name="1">
-          <el-form-item :label="first.attr_name" v-for="first in cateParamsDynamic" :key="first.attr_id">
+          <el-form-item
+            :label="first.attr_name"
+            v-for="first in cateParamsDynamic"
+            :key="first.attr_id"
+          >
             <el-checkbox-group v-model="cateCheckList">
-              <el-checkbox :label="second" v-for="(second, index) in first.attr_vals" :key="index" border checked></el-checkbox>\
+              <el-checkbox
+                :label="second"
+                v-for="(second, index) in first.attr_vals"
+                :key="index"
+                border
+                checked
+              ></el-checkbox
+              >\
             </el-checkbox-group>
           </el-form-item>
         </el-tab-pane>
-        <el-tab-pane label="商品属性" name="2">角色管理</el-tab-pane>
+        <el-tab-pane label="商品属性" name="2">
+          <el-form-item
+            label-width="150px"
+            :label="item.attr_name"
+            v-for="item in cateParamsStatic"
+            :key="item.attr_id"
+          >
+            <el-input :value="item.attr_vals" readonly></el-input>
+          </el-form-item>
+        </el-tab-pane>
         <el-tab-pane label="商品图片" name="3">
           <el-upload
             class="upload-demo"
@@ -64,16 +84,24 @@
             :on-remove="handleRemove"
             :on-success="handleSuccess"
             :file-list="fileList"
-            list-type="picture">
+            list-type="picture"
+          >
             <el-button size="small" type="primary">点击上传</el-button>
-            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+            <div slot="tip" class="el-upload__tip">
+              只能上传jpg/png文件，且不超过500kb
+            </div>
           </el-upload>
         </el-tab-pane>
         <el-tab-pane label="商品内容" name="4">
-         <quill-editor class="myquill" v-model="addForm.goods_introduce"></quill-editor>
+          <quill-editor
+            class="myquill"
+            v-model="addForm.goods_introduce"
+          ></quill-editor>
         </el-tab-pane>
       </el-tabs>
-      <el-button type="primary" plain class="fr" @click="addGoods">添加商品</el-button>
+      <el-button type="primary" plain class="fr" @click="addGoods"
+        >添加商品</el-button
+      >
     </el-form>
   </div>
 </template>
@@ -126,7 +154,7 @@ export default {
       if (file.type.indexOf('image/') !== 0) {
         this.$message.error('请上传图片')
         return false // 这一步会触发handleRemove,所以在handleRemove里面需要判断file.response
-      } else if (file.size >= (500 * 1024)) {
+      } else if (file.size >= 500 * 1024) {
         this.$message.error('图片过大,请换一张')
         return false
       }
@@ -185,7 +213,10 @@ export default {
         }
         // 如果是1,就获取动态参数
         if (this.activeName === '1') {
-          var res = await getAllCateParamsList(this.addForm.goods_cat.slice(-1), 'many')
+          const res = await getAllCateParamsList(
+            this.addForm.goods_cat.slice(-1),
+            'many'
+          )
           console.log(res)
           // 判断res.data.data是否有数据
           if (res.data.data.length === 0) {
@@ -195,25 +226,35 @@ export default {
           }
           this.cateParamsDynamic = res.data.data
           // console.log(this.cateParamsDynamic[0].attr_vals)
-          this.cateParamsDynamic.forEach(item => {
+          this.cateParamsDynamic.forEach((item) => {
             item.attr_vals = item.attr_vals ? item.attr_vals.split(',') : []
           })
           console.log(this.cateParamsDynamic[0].attr_vals)
-        } else { // 如果是2,就获取静态参数
-
+        } else {
+          // 如果是2,就获取静态参数
+          const res = await getAllCateParamsList(
+            this.addForm.goods_cat.slice(-1),
+            'only'
+          )
+          console.log(res)
+          // 判断res.data.data是否有数据
+          if (res.data.data.length === 0) {
+            this.$message.warning('当前分类没有商品属性')
+          }
+          this.cateParamsStatic = res.data.data
         }
       }
     }
   },
   mounted () {
     getAllCateList([1, 2, 3])
-      .then(res => {
+      .then((res) => {
         console.log(res)
         if (res.data.meta.status === 200) {
           this.cateList = res.data.data
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err)
       })
   }
