@@ -46,7 +46,13 @@
             ></el-cascader>
           </el-form-item>
         </el-tab-pane>
-        <el-tab-pane label="商品参数" name="1">配置管理</el-tab-pane>
+        <el-tab-pane label="商品参数" name="1">
+          <el-form-item :label="first.attr_name" v-for="first in cateParamsDynamic" :key="first.attr_id">
+            <el-checkbox-group v-model="cateCheckList">
+              <el-checkbox :label="second" v-for="(second, index) in first.attr_vals" :key="index" border checked></el-checkbox>\
+            </el-checkbox-group>
+          </el-form-item>
+        </el-tab-pane>
         <el-tab-pane label="商品属性" name="2">角色管理</el-tab-pane>
         <el-tab-pane label="商品图片" name="3">
           <el-upload
@@ -80,6 +86,7 @@ import 'quill/dist/quill.bubble.css'
 // 引模块
 import { quillEditor } from 'vue-quill-editor'
 import { getAllCateList } from '@/api/cate_index.js'
+import { getAllCateParamsList } from '@/api/cate_params.js'
 export default {
   components: {
     quillEditor
@@ -99,6 +106,9 @@ export default {
         pics: [],
         attrs: []
       },
+      cateCheckList: [],
+      cateParamsDynamic: [], // 动态参数
+      cateParamsStatic: [], // 静态参数
       cateList: [],
       cateprops: {
         label: 'cat_name',
@@ -164,8 +174,35 @@ export default {
       console.log(obj)
       console.log(this.addForm.goods_cat.join(','))
     },
-    handleClick (v) {
-      // console.log(v)
+    // 点击标签页触发
+    async handleClick () {
+      // 判断当标签页的商品参数或商品属性被选中时才向下执行
+      if (this.activeName === '1' || this.activeName === '2') {
+        // 判断基本信息中商品分类是否已选定
+        if (this.addForm.goods_cat.length !== 3) {
+          this.$message.warning('请选择基本信息中的商品分类')
+          return
+        }
+        // 如果是1,就获取动态参数
+        if (this.activeName === '1') {
+          var res = await getAllCateParamsList(this.addForm.goods_cat.slice(-1), 'many')
+          console.log(res)
+          // 判断res.data.data是否有数据
+          if (res.data.data.length === 0) {
+            this.$message.warning('当前分类没有商品参数')
+            this.cateParamsDynamic = []
+            return
+          }
+          this.cateParamsDynamic = res.data.data
+          // console.log(this.cateParamsDynamic[0].attr_vals)
+          this.cateParamsDynamic.forEach(item => {
+            item.attr_vals = item.attr_vals ? item.attr_vals.split(',') : []
+          })
+          console.log(this.cateParamsDynamic[0].attr_vals)
+        } else { // 如果是2,就获取静态参数
+
+        }
+      }
     }
   },
   mounted () {
