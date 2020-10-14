@@ -52,7 +52,7 @@
             v-for="first in cateParamsDynamic"
             :key="first.attr_id"
           >
-          <!-- 如果v-model绑定了一个公共数组cateCheckList,那么当有多组复选框时,会造成多组复选框都指向同一个数组,同时会造成只有最后一组数据,大麻烦啊!所以我们要为每一组绑定一个独立的数据成员,而循环的数据体first中有一个属性attr_vals,他是每一个对象中特有的数组,绑定它就可以实现: 取消勾选多选框可以影响到数据体first的属性attr_vals数组的数据.  然而需要注意的是checkbox中的checked属性会勾选中复选框,与group中的v-model属性相冲突,会造成绑定的值为true,取消checked属性即可 -->
+            <!-- 如果v-model绑定了一个公共数组cateCheckList,那么当有多组复选框时,会造成多组复选框都指向同一个数组,同时会造成只有最后一组数据,大麻烦啊!所以我们要为每一组绑定一个独立的数据成员,而循环的数据体first中有一个属性attr_vals,他是每一个对象中特有的数组,绑定它就可以实现: 取消勾选多选框可以影响到数据体first的属性attr_vals数组的数据.  然而需要注意的是checkbox中的checked属性会勾选中复选框,与group中的v-model属性相冲突,会造成绑定的值为true,取消checked属性即可 -->
             <el-checkbox-group v-model="first.attr_vals">
               <el-checkbox
                 :label="second"
@@ -115,6 +115,7 @@ import 'quill/dist/quill.bubble.css'
 import { quillEditor } from 'vue-quill-editor'
 import { getAllCateList } from '@/api/cate_index.js'
 import { getAllCateParamsList } from '@/api/cate_params.js'
+import { addGoods } from '@/api/goods_index.js'
 export default {
   components: {
     quillEditor
@@ -159,20 +160,48 @@ export default {
       }
     },
     // 添加商品
-    addGoods () {
+    async addGoods () {
       // console.log(this.addForm)
       // console.log(this.cateParamsDynamic)
+      // 判断商品信息必填项是否填写
+      if (
+        this.addForm.goods_name === '' ||
+        this.addForm.goods_price === '' ||
+        this.addForm.goods_number === '' ||
+        this.addForm.goods_weight === ''
+      ) {
+        this.$message.error('请输入完整的商品信息')
+        return
+      }
+      if (this.addForm.goods_cat.length !== 3) {
+        this.$message.error('请选择三级分类,一级或二级都不可以哦')
+        return
+      }
       // 搜集attrs数据
       // 遍历动态参数cateParamsDynamic,将attr_id和attr_value的值添加到addForm.attrs中
       for (var i = 0; i < this.cateParamsDynamic.length; i++) {
         var id = this.cateParamsDynamic[i].attr_id
         for (var j = 0; j < this.cateParamsDynamic[i].attr_vals.length; j++) {
-          this.addForm.attrs.push({ attr_id: id, attr_value: this.cateParamsDynamic[i].attr_vals[j] })
+          this.addForm.attrs.push({
+            attr_id: id,
+            attr_value: this.cateParamsDynamic[i].attr_vals[j]
+          })
         }
       }
       // 对参数addForm.goods_cat进行处理: 转成以,分割的字符串
       this.addForm.goods_cat = this.addForm.goods_cat.join(',')
       console.log(this.addForm)
+      // 添加商品
+      const res = await addGoods(this.addForm)
+      // console.log(res)
+      if (res.data.meta.status === 201) {
+        // 提示
+        this.$message.success(res.data.meta.msg)
+        // 清空(此处无效,可能是因为el-form中使用了标签页包裹el-form-item吧)
+        this.$refs.addForm.resetFields()
+        // 跳转
+        this.$router.push({ name: 'list' })
+      }
     },
     // 设置上传的请求头,为方便扩展,使用函数返回对象的形式
     getToken () {
