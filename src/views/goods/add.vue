@@ -20,6 +20,7 @@
       <el-tabs
         v-model="activeName"
         @tab-click="handleClick"
+        :before-leave="beforeLeave"
         tab-position="left"
         style="margin-top: 20px"
       >
@@ -147,6 +148,17 @@ export default {
     }
   },
   methods: {
+    // 离开标签页之前的钩子
+    // 当切换到  商品参数 或 商品属性  标签页时,判断基本信息中三级分类是否选择,没有选择的话就阻止标签页的跳转
+    beforeLeave (activeName, oldActiveName) {
+      // console.log(activeName, oldActiveName)
+      if (activeName === '1' || activeName === '2') {
+        if (this.addForm.goods_cat.length !== 3) {
+          this.$message.warning('请先选择基本信息中的三级分类')
+          return false
+        }
+      }
+    },
     // 文件上传之前的钩子,可以对上传文件进行合法性判断
     // file就是你当前所选择的文件对象
     handleBefore (file) {
@@ -246,11 +258,6 @@ export default {
     async handleClick () {
       // 判断当标签页的商品参数或商品属性被选中时才向下执行
       if (this.activeName === '1' || this.activeName === '2') {
-        // 判断基本信息中商品分类是否已选定
-        if (this.addForm.goods_cat.length !== 3) {
-          this.$message.warning('请选择基本信息中的商品分类')
-          return
-        }
         // 如果是1,就获取动态参数
         if (this.activeName === '1') {
           const res = await getAllCateParamsList(
